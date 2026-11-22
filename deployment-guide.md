@@ -190,7 +190,7 @@ Create an Instance Profile with an IAM role that can be assumed by EC2 and has t
 
 - EFS access, to allow the instance to store files on shared storage instead of locally.
 
-- CloudWatchAgent to allow the instance to send detailed logs and metrics to the CloudWatch service.
+- CloudWatchAgent, to allow the instance to send detailed logs and metrics to the CloudWatch service.
 
 RAM utilization, swap usage, and filesystem disk space which are not collected by default, will be collected using the agent every 1 minute interval. For these configurations, we create an SSM paramet called "CWAgentConfig" which the agent will use.
 
@@ -294,42 +294,24 @@ In addition to the MySQL client, we will install Apache for the web server and u
 
 Install system software including Apache, PHP and its necessary extensions, MySQL client, Composer and utilities:
 ```bash
-sudo dnf install -y \\
-
-httpd \\
-
-php \\
-
-php-mysqlnd \\
-
-php-fpm \\
-
-php-json \\
-
-php-mbstring \\
-
-php-xml \\
-
-php-gd \\
-
-php-curl \\
-
-php-zip \\
-
-php-intl \\
-
-mariadb105 \\
-
-amazon-efs-utils \\
-
-nmap-ncat \\
-
-curl \\
-
-unzip \\
-
-git \\
-
+sudo dnf install -y \
+httpd \
+php \
+php-mysqlnd \
+php-fpm \
+php-json \
+php-mbstring \
+php-xml \
+php-gd \
+php-curl \
+php-zip \
+php-intl \
+mariadb105 \
+amazon-efs-utils \
+nmap-ncat \
+curl \
+unzip \
+git \
 composer
 ```
 Enable and start Apache and PHP (start services now and also configure them to start automatically on boot):
