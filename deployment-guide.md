@@ -243,7 +243,7 @@ Under “Firewall” choose “Select existing security group” to assign the i
 
 Expand the “Advanced details” section and assign the instance with our instance profile which was also created through our stack earlier:
 
-<img src="screenshots/attachInstanceProfile.png" style="width:5.76806in;height:2.91944in" />
+<img src="screenshots/attachInstanceProfile.png" />
 
 This instance profile ensures the instance will have permissions to access SSM, EFS and CloudWatch.
 
