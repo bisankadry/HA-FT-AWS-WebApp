@@ -642,7 +642,24 @@ Our AMI is configured in a way in which WordPress relies on WP_HOME and WP_SITEU
 
 Since we’ve added an ALB to our infrastructure and our instances currently sit in a private subnet instead of a public one, we need to fix the WP configurations accordingly.
 
-1.  Install WP-CLI to update any reference of the public IP address of the EC2 created earlier to the ALB DNS name (or our custom domain that points to the LB if we were using one).
+1.  Install WP-CLI in order to use wp search-replace command and update any reference of the public IP address of the EC2 created earlier to the ALB DNS name (or our custom domain that points to the LB if we were using one).
+
+```bash
+sudo chmod +x wp-cli.phar
+sudo mv wp-cli.phar /usr/local/bin/wp
+```
+Verify that the installation was successful:
+```bash
+wp --info
+```
+<img src="screenshots/wp-cli-install.png"/>
+
+Since ssm-user doesn't have permissions on the wp files (because we've set user:group as root:apache) we will run the below command as Apache to verify that WordPress is detected:
+```bash
+sudo -u apache wp core is-installed --path=/var/www/html
+```
+
+Then we will run our search-replace command (as Apache again) with --dry-run to check the number of replacements:
 ```bash
 sudo -u apache wp search-replace \
 'http://<OLD_EC2_PUBLIC_IP> ' \
@@ -652,12 +669,35 @@ sudo -u apache wp search-replace \
 --dry-run \
 --path=/var/www/html
 ```
-Check the wp-config.php file and ensure WP_HOME and WP_SITEURL point to the Web-ALB:
+We can see 7 replacements can be made to the hardcoded old Public IP address:
+<img src="screenshots/search-replace.png"/>
+
+We will run the same command again, but this time without the --dry-run in order to execute the replacements:
+
+<img src="screenshots/search-replace-made.png"/>
+
+WordPress stores its public URL in the database, in the wp_options table:
+- siteurl: Where WordPress core is installed.
+- home: The public address visitors use to access our website.
+
+To ensure WordPress always uses our ALB DNS, We want to define these two values in the wp-config.php file with our public-facing ALB DNS name, because as long as they're not defined there, WordPress uses the database values instead.
+
+To edit the wp-config.php file:
+```bash
+cd /var/www/html
+sudo nano wp-config.php
+```
+
+We want to add these two custom values where indicated in the file:
+
 ```bash
 define('WP_HOME', 'http://<ALB_DNS_NAME>');
-
 define('WP_SITEURL', 'http://<ALB_DNS_NAME>');
 ```
+<img src="screenshots/wp_home_siturl.png"/>
+
+Once these changes are made, we can terminate the session and exit the session manager instance connection.
+
 Then, the same way we created an image from our EC2 instance earlier, we bake a new AMI of the current instance to include the above fixes.
 
 <img src="screenshots/image36.png" style="width:5.76806in;height:0.65625in" />
@@ -672,7 +712,11 @@ To ensure that all of our EC2 instances use the new AMI, we will start an instan
 
 <img src="screenshots/image39.png" style="width:5.76806in;height:3.34167in" />
 
-After the instance refresh is complete, we can navigate to the DNS name of our ELB to make sure our blog and media uploads are still available:
+After the instance refresh is complete, we can verify the old instance is terminated and a new one is up and running through our console:
+
+<img src="screenshots/refresh-complete.png" />
+
+Now we navigate to the DNS name of our ELB through our web browser to make sure our blog post and media uploads are still available as expected:
 
 <img src="screenshots/image40.png" style="width:5.76806in;height:3.39236in" />
 
