@@ -2,10 +2,10 @@
 
 ## Navigation
 
-- [Stage 1](#stage-1)
-- [Stage 2](#stage-2)
-- [Stage 3](#stage-3)
-- [Stage 4](#stage-4)
+- [Stage 1](#stage-1--base-infrastructure-in-iac)
+- [Stage 2](#stage-2--configure-ec2-instance-for-custom-ami)
+- [Stage 3](#stage-3---enable-elasticity-via-an-asg--alb)
+- [Stage 4](#stage-4---fix-wordpress-configurations-hardcoded-wphome)
 
 
 Building a Highly Available WordPress Web Application
@@ -546,7 +546,13 @@ Once the security group is created, we return to the “Create load balancer” 
 
 Under Listeners and routing, we keep the protocol as HTTP and Port as 80 and for the Default action, we want the “forward to target groups” selected. We click on “Create target group”, and select "Instances" for the target type, I named the group Web-TG and selected our VPC leaving everything else as default.
 
+<img src="screenshots/ALB-TG.png" />
+
 Once the target group is created, we go back again to the “Create load balancer” page and select our Web-TG.
+
+<img src="screenshots/listeners-routing-ALB.png" />
+
+Finally, we can press on "Create load balancer".
 
 ### Create LT (Launch Template)
 
@@ -576,6 +582,8 @@ Lastly, we expand the “Advanced details” section and choose the Instance pro
 
 <img src="screenshots/image26.png" style="width:5.76806in;height:0.85278in" />
 
+Once the above configurations are set, click on “Create launch template”.
+
 ### Create ASG (Auto Scaling Group)
 
 Still through the EC2 console, this time we navigate to the Auto Scaling Groups and click on “Create Auto Scaling group”.
@@ -602,7 +610,7 @@ In the next step, for our small project we set desired capacity (number of insta
 
 <img src="screenshots/image32.png" style="width:5.76806in;height:2.66458in" />
 
-Setting minimum capacity at 1 also acts as a fault-tolerance method as this forces the creation of a new instance to reach minimum capacity of 1 if the only instance in the group fails, and this is of course in addition to the primary goal of autoscaling which is improving performance based on load.
+Setting minimum capacity at 1 (or any value higher than 0) also acts as a fault-tolerance method as this forces the creation of a new instance to reach minimum capacity of 1 if the only instance in the group fails, and this is of course in addition to the primary goal of autoscaling which is improving performance based on load.
 
 In the same step, we want to also check the monitoring checkbox under “Additional settings” as this allows CloudWatch to see the group metrics that can determine the status of ASGs:
 
@@ -669,3 +677,9 @@ After the instance refresh is complete, we can navigate to the DNS name of our E
 <img src="screenshots/image40.png" style="width:5.76806in;height:3.39236in" />
 
 <img src="screenshots/image41.png" style="width:5.76806in;height:3.83125in" />
+
+
+
+**Notes
+This project was teared down once it was complete in order to stop continuous AWS charges. Resources were deleted in reverse order of creation.
+Sensitive information was replaced with placeholders in many locations. Any remaining sensitive information belongs to resources that no longer exist.
